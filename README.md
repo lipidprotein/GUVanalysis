@@ -16,10 +16,8 @@ Program 1 was written for GNU Octave and Program 2 and 3 were written for MATLAB
 
 # Credits & Licence
 
-This code includes the codes from the project SergeDmi/ConfocalGN
-- ConfocalGN (codes for confocal image creation),  Serge Dmitrieff in 2016 in EMBL
-
 This code includes:
+- ConfocalGN (codes for confocal image creation),  Serge Dmitrieff in 2016 in EMBL, (SergeDmi/ConfocalGN)
 - triangle_th, Dr B. Panneton, June, 2010
 - tiffread Copyright (C) 1999-2010 Francois Nedelec
 - gausss3filter Copyright (C) Max W.K. Law
