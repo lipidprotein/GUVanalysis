@@ -6,7 +6,7 @@ imds = imageDatastore('./Training/', ...
     'IncludeSubfolders',true,'LabelSource','foldernames');
 
 temp1 = dir('./Training/C1/');
-temp2 = dir('./Training/C1/');
+temp2 = dir('./Training/C2/');
 temp = min(length(temp1),length(temp2)) -2 % number of files  
 numTrainFiles = temp;
 [imdsTrain,imdsValidation] = splitEachLabel(imds,numTrainFiles,'randomize');
