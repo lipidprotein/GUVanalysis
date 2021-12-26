@@ -224,10 +224,22 @@ disp(['Stack ', [num2str(indexStack)],' : total ',[num2str(length(radii))], ' ci
   
   record{indexStack} = [centers, radii, strengths, intensity];
   
-  
+  %%//FinalRevision// modified for stack image instead of individual images
+  %if saveCircles == 1
+  %  print(indexStack, [PathOut '/' strrep(filelistA(index).name,'.tif',['_' num2str(indexStack) '.jpg'])]);  
+  %endif
   if saveCircles == 1
-    print(indexStack, [PathOut '/' strrep(filelistA(index).name,'.tif',['_' num2str(indexStack) '.jpg'])]);  
+      if indexStack==(1+ initSkip)
+        circleFileName = ['Stack_' filelistA(index).name]; 
+        H = getframe(figure(indexStack));
+        imwrite(H.cdata, [PathOut '/' circleFileName]); 
+      else
+        H = getframe(figure(indexStack));
+        imwrite(H.cdata, [PathOut '/' circleFileName],'WriteMode','append');  
+      endif
+
   endif
+ 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   endfor % stack loop
@@ -384,8 +396,17 @@ endif
     toSave = [toSave; avg_coordinate max_radii num_slices total_intensityA number_of_pixelsA average_intensityA backgrount_intensityA adjusted_intensityA total_intensityB number_of_pixelsB average_intensityB backgrount_intensityB adjusted_intensityB normalizedBA];
   endfor
   
+  %%//FinalRevision// modified for header and clean output
   OutName = strrep(filelistA(index).name,'.tif','.txt');
-  dlmwrite([PathOut '\' OutName],toSave,'delimiter','\t')  
+  %dlmwrite([PathOut '\' OutName],toSave,'delimiter','\t')  
+    fid = fopen([PathOut '\' OutName], 'wt');
+    fprintf(fid, '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n','X_avg_coordinate', 'Y_avg_coordinate', 'max_radii', 'num_slices', 'total_intensityA', 'num_of_pixelsA', 'avg_intA', 'background_intA', 'adjusted_intA', 'total_intensityB', 'num_of_pixelsB', 'avg_intB', 'background_intB', 'adjusted_intB', 'intB/intA');  % header
+    fclose(fid);
+    dlmwrite([PathOut '\' OutName],toSave,'delimiter','\t','-append');  
+
+  
+
+  
   if length(toSave) != 0
     disp(['Average intensity ChA: ', num2str(mean(toSave(:,7))), ' Average intensity ChB: ', num2str(mean(toSave(:,12)))]);
     disp(['Average adjusted intensity ChA: ', num2str(mean(toSave(:,9))), ' Average adjusted intensity ChB: ', num2str(mean(toSave(:,14)))]);
@@ -411,10 +432,11 @@ endif
   if length(centers) != 0 
     viscircles(centers, radii, 'color','cyan')
   endif
-  if saveCircles == 1
+    
+  if saveCircles == 1      
     print(indexStack + 1,[PathOut '/' strrep(filelistA(index).name,'.tif','_final_chA.jpg')]);  
   endif
-  
+    
   figure(indexStack + 2)
   imshow(imgB, [min(min(imgB)) 0.5*max(max(imgB))])
   title('ChB overlapped with final GUVs detected');
