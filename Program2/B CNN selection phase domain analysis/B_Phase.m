@@ -421,12 +421,40 @@ for index=1:1:length(filelistA)
 
     record{indexStack} = [centers, radii, strengths, intensity]; %%NR
   
+  %%//FinalRevision// modified for stack image instead of individual images
+  %if saveCircles == 1
+  %  print(indexStack, [PathOut '/' strrep(filelistA(index).name,'.tif',['_' num2str(indexStack) '.jpg'])], '-djpeg');  
+  %end
+  
   if saveCircles == 1
-    print(indexStack, [PathOut '/' strrep(filelistA(index).name,'.tif',['_' num2str(indexStack) '.jpg'])], '-djpeg');  
+      if indexStack==(1+ initSkip)
+        circleFileName = ['Stack_' filelistA(index).name]; 
+        H = getframe(figure(indexStack));
+        imwrite(H.cdata, [PathOut '/' circleFileName]); 
+      else
+        H = getframe(figure(indexStack));
+        imwrite(H.cdata, [PathOut '/' circleFileName],'WriteMode','append');  
+      end
+
   end
+
+  %%//FinalRevision// modified for header and clean output
+  %if saveEachIntensity == 1
+  %  OutName = strrep(['Int_' filelistA(index).name],'.tif',['_' num2str(indexStack) '.txt']);
+  %  dlmwrite([PathOut '\' OutName],record{indexStack},'delimiter','\t');  
+  %end
   if saveEachIntensity == 1
-    OutName = strrep(['Int_' filelistA(index).name],'.tif',['_' num2str(indexStack) '.txt']);
-    dlmwrite([PathOut '\' OutName],record{indexStack},'delimiter','\t');  
+      if length(record{indexStack}) == 0
+          %skip if nothing to show
+      else
+        OutName = strrep(['Int_' filelistA(index).name],'.tif',['_' num2str(indexStack) '.txt']);
+        fid = fopen([PathOut '/' OutName], 'wt');
+        fprintf(fid, '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n','X_avg_coordinate', 'Y_avg_coordinate', 'Radius', 'Fit_strength', 'Total_Int', ',num_pixels', 'avg_intensity', 'backgroundInt', 'Adjusted_int', 'adjIntensities_by_Segment');  % header
+        fclose(fid);
+        toWrite = record{indexStack};
+        toWrite(:,(size(toWrite,2)-3):size(toWrite,2)) = []; %elimniate the unnecessary information for the users
+        dlmwrite([PathOut '/' OutName],toWrite,'delimiter','\t','-append');  
+      end
   end
   
   end % stack loop
@@ -594,7 +622,12 @@ end
   disp(' ');
   
   OutName = strrep(filelistA(index).name,'.tif','.txt');
-  dlmwrite([PathOut '\' OutName],toSave,'delimiter','\t') ; 
+  
+  %%//FinalRevision// modified for headers 
+  fid = fopen([PathOut '/' OutName], 'wt');
+  fprintf(fid, '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n','X_avg_coordinate', 'Y_avg_coordinate', 'max_radii', 'num_slices', 'avg_intensity', 'max_intensity', 'min_intensity', 'Phase_0uniform_1binary_2multipleDomains' );  % header
+  fclose(fid);
+  dlmwrite([PathOut '/' OutName],toSave,'delimiter','\t','-append')
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
